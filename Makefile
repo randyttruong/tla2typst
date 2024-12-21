@@ -1,5 +1,5 @@
 # Define the output directory
-OUTPUT_DIR := ../build
+OUTPUT_DIR := ./build
 
 # Define the source file
 SOURCE_FILE := ./main.go
