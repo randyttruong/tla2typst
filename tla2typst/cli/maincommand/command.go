@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/randyttruong/tla2typst/cli/flags"
+	"github.com/randyttruong/tla2typst/scanner"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +20,15 @@ func Command() *cobra.Command {
 		Args:         cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			Filename = args[0]
+
+			scanner.LoadDocument(Filename) // TODO: Does this belong here?
 		},
 	}
 
 	flags.AddOutputFormatFlags(c)
 	flags.AddOutputFileFlags(c)
 	flags.AddCommentShadingFlags(c)
+	flags.AddConfigFlags(c)
 
 	c.AddCommand()
 
