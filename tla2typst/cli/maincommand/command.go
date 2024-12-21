@@ -23,6 +23,8 @@ func Command() *cobra.Command {
 	}
 
 	flags.AddOutputFormatFlags(c)
+	flags.AddOutputFileFlags(c)
+	flags.AddCommentShadingFlags(c)
 
 	c.AddCommand()
 
