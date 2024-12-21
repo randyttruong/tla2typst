@@ -2,7 +2,7 @@
 in progress engine for parsing tla+ specifications and making them compatible 
 for the typst markup system 
 
-inspired by [https://github.com/hengxin/tla2tex](tla2tex)
+inspired by (https://github.com/hengxin/tla2tex)[tla2tex]
 
 ## requirements
 - the tla2typst typst package, which contains all necessary scripting for 
