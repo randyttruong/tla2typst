@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/randyttruong/tla2typst/cli/flags"
-
 	"github.com/spf13/cobra"
 )
 
