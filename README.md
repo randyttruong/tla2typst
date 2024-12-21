@@ -1,6 +1,5 @@
 # tla2typst
-in progress engine for parsing tla+ specifications and making them compatible 
-for the typst markup system 
+Convert TLA+ Specifications to Typst code. 
 
 inspired by [tla2tex](https://github.com/hengxin/tla2tex)
 
