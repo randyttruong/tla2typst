@@ -1,2 +1,12 @@
 # tla2typst
-in progress typst package for rendering tla+ code 
+in progress engine for parsing tla+ specifications and making them compatible 
+for the typst markup system 
+
+## requirements
+- the tla2typst typst package, which contains all necessary scripting for 
+properly formatting a typst file containing formatted tla++ code.
+
+- the tla2typst program, which is a CLI that ingests `.tla` specifications and outputs them as valid `.typ` file. 
+
+
+
