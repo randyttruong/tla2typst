@@ -1,2 +1,3 @@
 # pdf output file from auto-compiling in vim
-main.pdf
+main.pdf 
+./build/
