@@ -1,5 +1,5 @@
 # tla2typst
-Convert TLA+ Specifications to Typst code. 
+Convert TLA+ Specifications to Typst code with customizable profiles. 
 
 inspired by [tla2tex](https://github.com/hengxin/tla2tex)
 
