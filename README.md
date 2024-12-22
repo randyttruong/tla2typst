@@ -25,8 +25,4 @@ properly formatting a typst file containing formatted tla++ code.
 
 - the tla2typst program, which is a CLI that ingests `.tla` specifications and outputs them as valid `.typ` file.
 
-# TODOs 
-- [ ] CLI functionality
-
-
 
