@@ -6,12 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	testFile1 = "../tests/sample_tla_code/Bakery.tla"
-	testFile2 = "../tests/sample_tla_code/Caesar.tla"
-	testFile3 = "../tests/sample_tla_code/NoPermissions100.tla"
-)
-
 func TestLoadConfigNormal(t *testing.T) {
 	tests := []struct {
 		testName string
