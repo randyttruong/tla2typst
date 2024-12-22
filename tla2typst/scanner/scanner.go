@@ -32,5 +32,27 @@ func GetScanner() *ScannerState {
 	return Scanner
 }
 
-type ScannerStateDelta struct {
+func (s *ScannerState) GetBuffer() ([]string, error) {
+	if Scanner.loader == nil || Scanner.loader.buf == nil {
+		err := errors.New("Unable to get buffer, loader or bytes array does not exist. Exiting.")
+
+		return nil, err
+	}
+
+	return Scanner.loader.buf, nil
+}
+
+func (s *ScannerState) ScanContent() error {
+
+	buf, err := s.GetBuffer()
+
+	if err != nil {
+		return errors.Wrapf(err, "Something went wrong with scanning, got %v", err)
+	}
+
+	for _, tok := range buf {
+		fmt.Printf("This is the current token: %v\n", tok)
+	}
+
+	return nil
 }
