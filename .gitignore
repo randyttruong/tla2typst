@@ -1,3 +1,5 @@
 # pdf output file from auto-compiling in vim
 main.pdf 
 ./build/
+./tla2typst/tests/sample_tla_code/BakeryNoComments.tla
+./tla2typst/tests/sample_tla_code/CaesarNoComments.tla
