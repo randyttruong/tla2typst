@@ -78,7 +78,12 @@ func LoadDocument(filepath string) error {
 		return errors.Wrapf(err, "Failed to read file, got %v", err)
 	}
 
-	// TODO: Write the actual parser
+	if bytes == nil {
+		err = errors.New("Bytes is empty")
+		return err
+	}
+
+	loader.buf = strings.Fields(string(bytes))
 
 	return nil
 }
