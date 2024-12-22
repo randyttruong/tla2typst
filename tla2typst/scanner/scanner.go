@@ -14,7 +14,7 @@ type ScannerState struct {
 }
 
 var (
-	Scanner *ScannerState
+	Scanner = &ScannerState{}
 )
 
 // InitScanner passes the loader into ScannerState
