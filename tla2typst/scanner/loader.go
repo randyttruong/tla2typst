@@ -4,13 +4,26 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
 )
 
-type Scanner struct {
-	fileBytes []byte
+type Loader struct {
+	buf []string
+}
+
+var (
+	loader = &Loader{}
+)
+
+func GetLoader() *Loader {
+	return loader
+}
+
+func SetBuffer(arr []string) {
+	loader.buf = arr
 }
 
 func checkFilePermissionsAndOwnership(filepath string) error {
@@ -48,6 +61,7 @@ func checkFilePermissionsAndOwnership(filepath string) error {
 }
 
 func LoadDocument(filepath string) error {
+
 	err := checkFilePermissionsAndOwnership(filepath)
 
 	if err != nil {
