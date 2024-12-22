@@ -1,5 +1,15 @@
 # pdf output file from auto-compiling in vim
 main.pdf 
-./build/
+
+# build folder 
+./build/ 
+
+# piped test outputs 
+./tla2typst/cli/flags//*.txt
+./tla2typst/cli/config//*.txt
+./tla2typst/cli/maincommand///*.txt
+./tla2typst/scanner//*.txt
+
+# uncommented tla code
 ./tla2typst/tests/sample_tla_code/BakeryNoComments.tla
 ./tla2typst/tests/sample_tla_code/CaesarNoComments.tla
