@@ -3,12 +3,14 @@ Convert TLA+ Specifications to Typst code with customizable profiles.
 
 inspired by [tla2tex](https://github.com/hengxin/tla2tex)
 
-# practical make targets 
+# Cloning
+1. Clone the repository
+2. From the `/tlatypst` directory, run any of the following `make` targets: 
 ```bash
-# deletes the /build folder (if exists), then builds the project, storing it in the /build folder 
+# deletes the /build folder (if exists), then builds the project, storing it in the /tla2typst/build folder 
 make clean build
 
-# build the project to the /build folder
+# build the project to the /tla2typst/build folder
 make build
 ```
 
