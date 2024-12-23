@@ -1,24 +1,30 @@
 package flags
 
 import (
+	"os"
+
+	"github.com/randyttruong/tla2typst/pkg/util"
 	"github.com/spf13/cobra"
+
+	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 )
 
 type TlaConfig struct {
 	Name string `json:"name"` // identifier
 
 	// Output Format Options
-	PointSize        int8 `json:"pointSize,omitempty"`
-	TextWidth        int8 `json:"textWidth,omitempty"`
-	TextHeight       int8 `json:"textHeight,omitempty"`
-	HorizontalOffset int8 `json:"horizontalOffset,omitempty"`
-	VerticalOffset   int8 `json:"verticalOffset,omitempty"`
+	PointSize        int8  `json:"pointSize,omitempty"`
+	TextWidth        int32 `json:"textWidth,omitempty"`
+	TextHeight       int32 `json:"textHeight,omitempty"`
+	HorizontalOffset int32 `json:"horizontalOffset,omitempty"`
+	VerticalOffset   int32 `json:"verticalOffset,omitempty"`
 
 	// Comment Shading Options
 	UseShading       bool    `json:"shading,omitempty"`
 	UsePcalShading   bool    `json:"pcalShading,omitempty"`
 	CommentGrayLevel float32 `json:"commentGrayLevel,omitempty"`
-	CreatePostScript float32 `json:"postscript,omitempty"`
+	CreatePostScript bool    `json:"postscript,omitempty"`
 
 	// Output File Options
 	OutputFilename          string `json:"output,omitempty"`
