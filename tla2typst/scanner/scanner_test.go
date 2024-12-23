@@ -73,6 +73,155 @@ func TestScanContentWithFiles(t *testing.T) {
 	}
 }
 
+func TestScanContentSpecialChar(t *testing.T) {
+	tests := []struct {
+		testName string
+		err      error
+	}{
+		{},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+
+		})
+	}
+}
+
+func TestScanContentComments(t *testing.T) {
+	tests := []struct {
+		testName       string
+		test           string
+		expectedStream []*Token
+		err            error
+	}{
+		{
+			testName: "Single-line block comments 1",
+			test:     "(* HELLO *)",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: BLOCK_COMMENT,
+					value:     "(* HELLO *)",
+				},
+			},
+		},
+		{
+			testName: "Single-line block comments 2",
+			test:     "(****************)",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: BLOCK_COMMENT,
+					value:     "(****************)",
+				},
+			},
+		},
+		{
+			testName: "Inline comments 1",
+			test:     "Init == \\/ A /\\ B (* This is a comment *)",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "INIT",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "==",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "A",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "B",
+				},
+				&Token{
+					tokenType: BLOCK_COMMENT,
+					value:     "(* This is a comment *)",
+				},
+			},
+		},
+		{
+			testName: "Inline comments 2",
+			test:     "Init == \\/ A /\\ B \\* This is a comment",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "INIT",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "==",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "A",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "B",
+				},
+				&Token{
+					tokenType: BLOCK_COMMENT,
+					value:     "\\* This is a comment",
+				},
+			},
+		},
+		{
+			testName: "Multi-line comments",
+			test:     "(*\n\tThis is a test multiline comment.\n*)",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: BLOCK_COMMENT,
+					value:     "(*\n\tThis is a test multiline comment.\n*)",
+				},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+
+			scanner := GetScanner()
+			scanner.stream = []*Token{}
+
+			SetBuffer(tc.test)
+
+			err := InitScanner(GetLoader())
+			assert.NoError(t, err, "There should be no error with loading the buf.\n")
+
+			err = scanner.ScanContent()
+			assert.NoError(t, err, "There should be no issues with scanning.")
+
+			fmt.Printf("This is the sample string:%v\n", tc.test)
+
+			runTokenVerification(scanner, tc.expectedStream, t)
+
+			// fmt.Printf("This is the token stream:\n")
+			// for _, tok := range scanner.stream {
+			// 	fmt.Printf("%v,\n", *tok)
+			// }
+
+		})
+	}
+}
+
 func TestScanContentOnInlineCases(t *testing.T) {
 
 	tests := []struct {
