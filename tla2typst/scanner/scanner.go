@@ -160,6 +160,8 @@ func (s *ScannerState) ScanContent() error {
 			if _, exists := DELIMITERS[s.val]; exists {
 				tok.tokenType = DELIMITER
 				tok = s.pushToken(tok)
+			} else if _, exists := SPECIALS[s.val]; exists {
+				tok.tokenType = SPECIAL
 			} else if _, exists := OPERATORS[s.val]; exists {
 				tok.tokenType = OPERATOR
 				if curr == '=' {
@@ -224,6 +226,51 @@ func (s *ScannerState) ScanContent() error {
 			if curr == ' ' {
 				s.val = s.val[0 : len(s.val)-1]
 				tok = s.pushToken(tok)
+			}
+		} else if tok.tokenType == SPECIAL {
+			switch s.val[0] {
+			case '(':
+				if curr == '*' {
+					tok.tokenType = BLOCK_COMMENT
+				} else {
+					body := s.val[1:]
+					s.val = string(s.val[0])
+
+					tok.tokenType = DELIMITER
+					s.pushToken(tok)
+
+					s.val = body
+
+					if unicode.IsLetter(curr) {
+						tok.tokenType = IDENTIFIER
+					} else if curr == '"' {
+						tok.tokenType = STRING_LITERAL
+					} else if unicode.IsNumber(curr) {
+						tok.tokenType = NUM_LITERAL
+					} else if _, exists := DELIMITERS[string(curr)]; exists {
+						tok.tokenType = DELIMITER
+						s.pushToken(tok)
+					}
+				}
+			case '\\':
+				if curr == '*' {
+					tok.tokenType = INLINE_COMMENT
+				} else if curr == '/' {
+					tok.tokenType = OPERATOR
+				} else if unicode.IsLetter(curr) {
+					tok.tokenType = UNASSIGNED
+				} else if unicode.IsNumber(curr) {
+					err := fmt.Errorf("[FATAL ERROR]: Unknown token %v, breaking", s.val)
+					return err
+				}
+			}
+		} else if tok.tokenType == INLINE_COMMENT {
+			if curr == '\n' || pos == *bufLen-1 {
+				s.pushToken(tok)
+			}
+		} else if tok.tokenType == BLOCK_COMMENT {
+			if s.val[len(s.val)-2:len(s.val)] == "*)" {
+				s.pushToken(tok)
 			}
 		}
 	}
