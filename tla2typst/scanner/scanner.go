@@ -100,7 +100,7 @@ func stripDelimiters(s string, delims string) (bool, string, string, string) {
 }
 
 func containsDelimPair(s string) (string, bool) {
-	for _, t := range DELIMITERS {
+	for t, _ := range DELIMITERS {
 		first, second := string(t[0]), string(t[1])
 
 		if strings.Contains(s, first) && strings.Contains(s, second) {
@@ -120,149 +120,111 @@ func isNumLiteral(s string) bool {
 	return true
 }
 
+func (s *ScannerState) pushToken(tok *Token) *Token {
+	tok.pos = s.pos
+	tok.value = strings.TrimSpace(s.val)
+
+	s.stream = append(s.stream, tok)
+	s.val = ""
+	s.pos++
+	return &Token{tokenType: UNASSIGNED}
+}
+
 func (s *ScannerState) ScanContent() error {
 
-	buf, err := s.GetBuffer()
+	buf, bufLen, err := s.GetBuffer()
+
+	fmt.Printf("This is the len: %v", bufLen)
 
 	if err != nil {
 		return errors.Wrapf(err, "Something went wrong with scanning, got %v", err)
 	}
 
-	// TODO: pos is inaccurate, create a global one
+	tok := &Token{tokenType: UNASSIGNED}
 
-	for pos, curr := range buf {
-		fmt.Printf("This is the current token: %v\n", curr)
-		continue
+	for pos, curr := range *buf {
 
-		tok := &Token{}
+		currStr := string(curr)
 
-		if _, exists := KEYWORDS[curr]; exists {
-			tok.tokenType = KEYWORD
-			tok.value = curr
-		} else if _, exists := OPERATORS[curr]; exists {
-			tok.tokenType = OPERATOR
-			tok.value = curr
-		} else if fnOp, exists := containsFnOp(curr); exists {
-			op_tok := &Token{}
+		s.val += currStr
 
-			op_tok.tokenType = OPERATOR
-			op_tok.value = fnOp
-			op_tok.pos = s.pos
+		// fmt.Println("---")
+		// fmt.Printf("[DEBUG] This is the current char: %v\n", currStr)
+		// fmt.Printf("[DEBUG] This is the current token: %v\n", s.val)
+		// fmt.Printf("[DEBUG] This is the pos: %v\n", pos)
 
-			s.pos++
-
-			target := stripFnOp(curr, fnOp)
-
-			// test if the functional operator is the entire string, which
-			// it shouldn't
-			if target == "" {
-				continue
-			}
-
-			delims, exists := containsDelimPair(curr)
-
-			if exists {
-				found, delim1, delim2, substr := stripDelimiters(curr, delims)
-
-				// How does this deal with potentially recursive calls?
-				// Seq(Something[Something[]])
-				if found {
-					s_delim_token := &Token{}
-					s_delim_token.tokenType = DELIMITER
-					s_delim_token.value = delim1
-					s_delim_token.pos = s.pos
-
-					s.pos++
-					fmt.Printf("This is just so I can build: %v, %v", delim2, substr)
-				}
-
-			}
-
-		} else if _, exists := containsDelimPair(curr); exists {
-		} else {
-			// check for sneaky functional operators
-			// TODO: Check for potential problems, such as if
-			// the operator is a substring of a var name, although
-			// I'm sure that TLA+ probably wouldn't let you naming something
-			// Sequence...
-
-			// 1. Check to see if there is a functional operator
-			is_fnop := false
-
-			for _, op := range FUNCTIONAL_OPERATORS {
-				if strings.Contains(curr, op) {
-					tok.tokenType = OPERATOR
-					tok.value = curr
-					is_fnop = true
-					break
-				}
-			}
-
-			is_seq := false
-			start, end := curr[0], curr[len(curr)-1]
-
-			if start == '[' || end == ']' || start == '{' || end == '}' {
-				var symbol string
-
-				op_tok := &Token{}
-				op_tok.tokenType = OPERATOR
-
-				// Check for singleton operator (representing some comprehension)
-				if len(curr) == 1 {
-					op_tok.value = curr
-					op_tok.pos = pos
-					pos++
-					s.stream = append(s.stream, op_tok)
+		if tok.tokenType == UNASSIGNED {
+			// TODO: Check out how newlines and whitespace are addressed
+			// Should I keep track of the position?
+			if _, exists := DELIMITERS[s.val]; exists {
+				tok.tokenType = DELIMITER
+				tok = s.pushToken(tok)
+			} else if _, exists := OPERATORS[s.val]; exists {
+				tok.tokenType = OPERATOR
+				if curr == '=' {
 					continue
 				}
+				tok = s.pushToken(tok)
+			} else if _, exists := KEYWORDS[s.val]; exists {
+				tok.tokenType = KEYWORD
+			} else if curr == '"' {
+				// NOTE: Because there aren't any while-loops in Go,
+				// it is necessary to abstract the token logic
+				tok.tokenType = STRING_LITERAL
+			} else if unicode.IsNumber(curr) {
+				tok.tokenType = NUM_LITERAL
+			} else if unicode.IsLetter(curr) {
+				tok.tokenType = IDENTIFIER
+			} else if unicode.IsSpace(curr) {
+				s.val = ""
+			}
+		} else if tok.tokenType == KEYWORD {
+			if unicode.IsSpace(curr) {
+				s.val = s.val[0 : len(s.val)-1]
+				tok = s.pushToken(tok)
+			} else if unicode.IsLetter(curr) || unicode.IsNumber(curr) {
+				tok.tokenType = IDENTIFIER
+			} else {
+				err = fmt.Errorf("[FATAL ERROR]: Attempted adding a nonalpha character to a keyword/identifier")
+				return err
+			}
+		} else if tok.tokenType == IDENTIFIER {
+			// cases:
+			// + cannot have delimiters or punctuation
+			if curr == ' ' || curr == '\n' {
+				s.val = s.val[0 : len(s.val)-1]
+				tok = s.pushToken(tok)
+			} else if curr == '(' || curr == ')' || curr == '{' || curr == '}' {
+				s.val = s.val[0 : len(s.val)-1]
+				tok = s.pushToken(tok)
 
-				// If not singleton, then check to see
-				if containsStartingSymbol(curr) {
-					symbol = string(curr[0])
-					curr = curr[1:]
-
-					op_tok.value = symbol
-					op_tok.pos = pos
-					pos++
-					s.stream = append(s.stream, op_tok)
-				} else if containsEndingSymbol(curr) {
-					symbol = string(curr[len(curr)-1])
-					curr = curr[0 : len(curr)-1]
-
-				}
-
-				pos++
-
-				// check if we're subscripting something
-				if containsBothBrackets(curr) {
-					start, end := findStartAndEndBrackets(curr)
-					fmt.Println("This is just so that I can build %v, %v", start, end)
-				}
-
-				// now check if it's a string literal, a numeric literal, or
-				// an identifier
-
-				// TODO: Check what happens when we try to index something, ie arr[1]
-				// TODO(future): oooo we also have set notation to deal with too
-				// TODO(future): oooo we also have set indexing to deal with too
+				tok.tokenType = DELIMITER
+				s.val += currStr
+				tok = s.pushToken(tok)
+			}
+		} else if tok.tokenType == OPERATOR {
+			if curr == ' ' {
+				tok = s.pushToken(tok)
+			}
+		} else if tok.tokenType == STRING_LITERAL {
+			if curr == '"' || curr == '\n' {
+				tok = s.pushToken(tok)
+			} else if pos == *bufLen-1 {
+				err = fmt.Errorf("[FATAL ERROR]: Unclosed literal")
+				return err
+			}
+		} else if tok.tokenType == NUM_LITERAL {
+			// error handling here
+			if !unicode.IsNumber(curr) {
+				err = fmt.Errorf("[FATAL ERROR]: Numeric literal found at (LOL I NEED TO KEEP TRACK OF POS) inserts non-numeric char: %v", s.val)
+				return err
 			}
 
-			if !is_fnop && !is_seq {
-
-				// check if numeric
-				if _, err := strconv.Atoi(curr); err == nil {
-					tok.tokenType = NUM_LITERAL
-					tok.value = curr
-				} else if start == '"' && end == '"' {
-					tok.tokenType = STRING_LITERAL
-					tok.value = curr
-				}
+			if curr == ' ' {
+				s.val = s.val[0 : len(s.val)-1]
+				tok = s.pushToken(tok)
 			}
 		}
-
-		tok.pos = s.pos
-		s.stream = append(s.stream, tok)
-		s.pos++
 	}
 
 	return nil
