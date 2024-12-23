@@ -64,15 +64,6 @@ func containsEndingSymbol(s string) bool {
 	return s[end] == ']' || s[end] == '}'
 }
 
-func containsFnOp(s string) (string, bool) {
-	for _, t := range FUNCTIONAL_OPERATORS {
-		if strings.Contains(s, t) {
-			return t, true
-		}
-	}
-	return "", false
-}
-
 func stripFnOp(s string, fnOp string) string {
 	idx := strings.LastIndex(s, fnOp)
 
