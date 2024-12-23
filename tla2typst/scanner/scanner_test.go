@@ -73,6 +73,123 @@ func TestScanContentWithFiles(t *testing.T) {
 	}
 }
 
+func TestScanContentOnInlineCases(t *testing.T) {
+
+	tests := []struct {
+		testName       string
+		sample         string
+		expectedStream []*Token
+		err            error
+	}{
+		{
+			testName: "helloWorld",
+			sample:   "print(\"Hello World!\")",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "print",
+				},
+				&Token{
+					tokenType: DELIMITER,
+					value:     "(",
+				},
+				&Token{
+					tokenType: STRING_LITERAL,
+					value:     "\"Hello World!\"",
+				},
+				&Token{
+					tokenType: DELIMITER,
+					value:     ")",
+				},
+			},
+		},
+		{
+			testName: "InitialState",
+			sample:   "Init == \\/ A /\\ B\n        \\/ B /\\ C\n       \\/ C /\\ D\n",
+			expectedStream: []*Token{
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "Init",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "==",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "A",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "B",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "B",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "C",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "C",
+				},
+				&Token{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				&Token{
+					tokenType: IDENTIFIER,
+					value:     "D",
+				},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+
+			scanner := GetScanner()
+			scanner.stream = []*Token{}
+
+			SetBuffer(tc.sample)
+
+			err := InitScanner(GetLoader())
+			assert.NoError(t, err, "There should be no error with loading the buf.\n")
+
+			err = scanner.ScanContent()
+			assert.NoError(t, err, "There should be no issues with scanning.")
+
+			runTokenVerification(scanner, tc.expectedStream, t)
+			fmt.Printf("This is the token stream:\n")
+			for _, tok := range scanner.stream {
+				fmt.Printf("%v,\n", *tok)
+			}
+		})
+	}
+}
+
 func TestScanContentWithSpecificCases(t *testing.T) {
 
 	// TODO: Use a smaller one, this is just for testing the output in terminal.
