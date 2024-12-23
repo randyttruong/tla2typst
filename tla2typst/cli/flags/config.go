@@ -34,7 +34,7 @@ type TlaConfig struct {
 }
 
 type Config struct {
-	TlaConfigs map[string]*TlaConfig
+	TlaConfigs TlaConfig
 }
 
 var (
