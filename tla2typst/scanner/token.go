@@ -10,7 +10,7 @@ const (
 	OPERATOR
 	SPECIAL
 	DELIMITER
-	NONE
+	UNASSIGNED
 )
 
 var (
