@@ -35,11 +35,11 @@ func GetScanner() *ScannerState {
 	return Scanner
 }
 
-func (s *ScannerState) GetBuffer() ([]string, error) {
-	if Scanner.loader == nil || Scanner.loader.buf == nil {
+func (s *ScannerState) GetBuffer() (string, error) {
+	if Scanner.loader == nil || Scanner.loader.buf == "" {
 		err := errors.New("Unable to get buffer, loader or bytes array does not exist. Exiting.")
 
-		return nil, err
+		return "", err
 	}
 
 	return Scanner.loader.buf, nil
