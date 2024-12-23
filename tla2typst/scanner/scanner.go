@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/pkg/errors"
 )
@@ -12,7 +13,7 @@ import (
 type ScannerState struct {
 	loader *Loader
 	stream []*Token
-	val    int
+	val    string
 	pos    int
 }
 
@@ -22,7 +23,7 @@ var (
 
 // InitScanner passes the loader into ScannerState
 func InitScanner(loader *Loader) error {
-	if loader == nil || GetLoader().buf == nil {
+	if loader == nil || GetLoader().buf == "" {
 		return errors.New("Loader or buffer does not exist/is empty.")
 	}
 
@@ -35,14 +36,14 @@ func GetScanner() *ScannerState {
 	return Scanner
 }
 
-func (s *ScannerState) GetBuffer() (string, error) {
+func (s *ScannerState) GetBuffer() (*string, *int, error) {
 	if Scanner.loader == nil || Scanner.loader.buf == "" {
 		err := errors.New("Unable to get buffer, loader or bytes array does not exist. Exiting.")
 
-		return "", err
+		return nil, nil, err
 	}
 
-	return Scanner.loader.buf, nil
+	return &(Scanner.loader.buf), &(Scanner.loader.bufLen), nil
 }
 
 func containsBothBrackets(s string) bool {
