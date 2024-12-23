@@ -7,15 +7,19 @@ import (
 var (
 	outputFilenameDefault = "" // TODO: Make this the .tla input filename
 	outputFilename        string
+	outputFilenameSet     = false
 
 	alignmentOutputFilenameDefault = "" // TODO: Make this the .tla input filename
 	alignmentOutputFilename        string
+	alignmentOutputFilenameSet     = false
 
 	tlaOutputFilenameDefault = "" // TODO: Make this the .tla input filename
 	tlaOutputFilename        string
+	tlaOutputFilenameSet     = false
 
 	stylePackageFilenameDefault = "" // NOTE: Make this none by default
 	stylePackageFilename        string
+	stylePackageFilenameSet     = false
 )
 
 var (
@@ -57,6 +61,8 @@ func addOutputFilenameFlag(c *cobra.Command) {
 		outputFilenameDefault,
 		"",
 	)
+
+	outputFilenameSet = c.PersistentFlags().Lookup(outputFilenameFlagName).Changed
 }
 
 func addAlignmentOutputFilenameFlag(c *cobra.Command) {
@@ -67,6 +73,8 @@ func addAlignmentOutputFilenameFlag(c *cobra.Command) {
 		alignmentOutputFilenameDefault,
 		"",
 	)
+
+	alignmentOutputFilenameSet = c.PersistentFlags().Lookup(alignmentOutputFilenameFlagName).Changed
 }
 
 func addTlaOutputFilenameFlag(c *cobra.Command) {
@@ -77,6 +85,8 @@ func addTlaOutputFilenameFlag(c *cobra.Command) {
 		tlaOutputFilenameDefault,
 		"",
 	)
+
+	tlaOutputFilenameSet = c.PersistentFlags().Lookup(tlaOutputFilenameFlagName).Changed
 }
 
 func addStylePackageFilenameFlag(c *cobra.Command) {
@@ -87,4 +97,6 @@ func addStylePackageFilenameFlag(c *cobra.Command) {
 		stylePackageFilenameDefault,
 		"",
 	)
+
+	stylePackageFilenameSet = c.PersistentFlags().Lookup(stylePackageFilenameFlagName).Changed
 }
