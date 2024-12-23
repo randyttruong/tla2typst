@@ -7,16 +7,20 @@ import (
 var (
 	useShadingDefault = false
 	useShading        bool
+	useShadingSet     = false
 
 	usePcalShadingDefault = true
 	usePcalShading        bool
+	usePcalShadingSet     = false
 
 	commentGrayLevelDefault float32 = 0.85
 	commentGrayLevel        float32
+	commentGrayLevelSet     = false
 
 	// created with -shade by default, otherwise no
 	createPostScriptDefault = false
 	createPostScript        bool
+	createPostScriptSet     = false
 )
 
 var (
@@ -57,6 +61,8 @@ func addUseShadingFlag(c *cobra.Command) {
 		useShadingDefault,
 		"",
 	)
+
+	useShadingSet = c.PersistentFlags().Lookup(useShadingFlagName).Changed
 }
 
 func addUsePcalShadingFlag(c *cobra.Command) {
@@ -67,6 +73,8 @@ func addUsePcalShadingFlag(c *cobra.Command) {
 		usePcalShadingDefault,
 		"",
 	)
+
+	usePcalShadingSet = c.PersistentFlags().Lookup(usePcalShadingFlagName).Changed
 }
 
 func addCommentGrayLevelFlag(c *cobra.Command) {
@@ -77,6 +85,8 @@ func addCommentGrayLevelFlag(c *cobra.Command) {
 		commentGrayLevelDefault,
 		"",
 	)
+
+	commentGrayLevelSet = c.PersistentFlags().Lookup(commentGrayLevelFlagName).Changed
 }
 
 func addCreatePostScriptFlag(c *cobra.Command) {
@@ -87,4 +97,6 @@ func addCreatePostScriptFlag(c *cobra.Command) {
 		createPostScriptDefault,
 		"",
 	)
+
+	createPostScriptSet = c.PersistentFlags().Lookup(createPostScriptFlagName).Changed
 }
