@@ -40,7 +40,7 @@ type Config struct {
 var (
 	configFilenameDefault = ""
 	configFilename        string
-	configSet             bool = false
+	configFilenameSet     bool = false
 
 	config *Config
 )
