@@ -10,7 +10,8 @@ const (
 	OPERATOR
 	SPECIAL
 	DELIMITER
-	COMMENT // TODO: Finish comment lexing
+	BLOCK_COMMENT // TODO: Finish comment lexing
+	INLINE_COMMENT
 	UNASSIGNED
 )
 
