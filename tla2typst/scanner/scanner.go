@@ -153,6 +153,7 @@ func (s *ScannerState) ScanContent() error {
 		// fmt.Printf("[DEBUG] This is the current token: %v\n", s.val)
 		// fmt.Printf("[DEBUG] This is the pos: %v\n", pos)
 
+		// TODO: Add comment support
 		if tok.tokenType == UNASSIGNED {
 			// TODO: Check out how newlines and whitespace are addressed
 			// Should I keep track of the position?

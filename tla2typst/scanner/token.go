@@ -10,6 +10,7 @@ const (
 	OPERATOR
 	SPECIAL
 	DELIMITER
+	COMMENT // TODO: Finish comment lexing
 	UNASSIGNED
 )
 
@@ -86,6 +87,9 @@ var (
 	SPECIALS = map[string]bool{
 		"\\r\\n": true,
 	}
+
+	// TODO: Finish comments
+	COMMENTS = map[string]bool{}
 )
 
 type Token struct {
