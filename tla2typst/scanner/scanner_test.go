@@ -1,10 +1,37 @@
 package scanner
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func tokenEquals(a, b *Token) (bool, error) {
+
+	if a.tokenType != b.tokenType && a.value != b.value {
+		err := fmt.Errorf("Expected tokenType: %v,\nActual tokenType: %v,\nExpected value: %v,\nActual value: %v",
+			a.tokenType,
+			b.tokenType,
+			a.value,
+			b.value,
+		)
+		return false, err
+	}
+
+	return true, nil
+}
+
+func runTokenVerification(s *ScannerState, stream []*Token, t *testing.T) {
+	fmt.Printf("This is the token stream:\n")
+	for _, tok := range s.stream {
+		fmt.Printf("%v,\n", *tok)
+	}
+	for idx, tok := range stream {
+		res, err := tokenEquals(tok, s.stream[idx])
+		assert.True(t, res, err)
+	}
+}
 
 func TestScanContentWithFiles(t *testing.T) {
 
