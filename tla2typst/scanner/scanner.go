@@ -134,7 +134,7 @@ func (s *ScannerState) ScanContent() error {
 
 	buf, bufLen, err := s.GetBuffer()
 
-	fmt.Printf("This is the len: %v", bufLen)
+	fmt.Printf("This is the len: %v\n", *bufLen)
 
 	if err != nil {
 		return errors.Wrapf(err, "Something went wrong with scanning, got %v", err)
