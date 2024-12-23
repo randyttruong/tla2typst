@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 	"os/user"
-	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
 )
 
 type Loader struct {
-	buf []string
+	buf string
 }
 
 var (
@@ -22,7 +21,7 @@ func GetLoader() *Loader {
 	return loader
 }
 
-func SetBuffer(arr []string) {
+func SetBuffer(arr string) {
 	loader.buf = arr
 }
 
@@ -83,7 +82,7 @@ func LoadDocument(filepath string) error {
 		return err
 	}
 
-	loader.buf = strings.Fields(string(bytes))
+	SetBuffer(string(bytes))
 
 	return nil
 }
