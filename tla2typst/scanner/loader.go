@@ -10,7 +10,8 @@ import (
 )
 
 type Loader struct {
-	buf string
+	buf    string
+	bufLen int
 }
 
 var (
@@ -23,6 +24,7 @@ func GetLoader() *Loader {
 
 func SetBuffer(arr string) {
 	loader.buf = arr
+	loader.bufLen = len(loader.buf)
 }
 
 func checkFilePermissionsAndOwnership(filepath string) error {
