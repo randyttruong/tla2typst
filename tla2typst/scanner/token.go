@@ -76,21 +76,23 @@ var (
 	}
 
 	DELIMITERS = map[string]bool{
-		"(": true,
-		")": true,
-		"[": true,
-		"]": true,
-		"{": true,
-		"}": true,
-		",": true,
+		// "(": true,
+		// ")": true,
+		")":  true,
+		" [": true,
+		"]":  true,
+		"{":  true,
+		"}":  true,
+		",":  true,
 	}
 
+	// + SPECIALS denote ambigious characters
 	SPECIALS = map[string]bool{
-		"\\r\\n": true,
+		// + Left parenthesis serve as both expression delimiters + block comment delimiters
+		"(": true,
+		// + Forward slashes are start chars for both logical AND and inline comments
+		"\\": true,
 	}
-
-	// TODO: Finish comments
-	COMMENTS = map[string]bool{}
 )
 
 type Token struct {
