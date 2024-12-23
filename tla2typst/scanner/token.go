@@ -65,27 +65,26 @@ var (
 		"[]": true,
 		"<>": true,
 		"~>": true,
-		// + NOTE THAT FUNCTIONAL OPERATORS, LIKE
-		// SEQUENCES, MUST BE CHECKED MANUALLY, AND
-		// ARE HANDLED SEPARATELY
+		// + FUNCTIONAL OPERATORS
+		"Seq":    true,
+		"Head":   true,
+		"Tail":   true,
+		"Append": true,
+		"Len":    true,
 	}
 
-	FUNCTIONAL_OPERATORS = []string{
-		"Seq",
-		"Head",
-		"Tail",
-		"Append",
-		"Len",
+	DELIMITERS = map[string]bool{
+		"(": true,
+		")": true,
+		"[": true,
+		"]": true,
+		"{": true,
+		"}": true,
+		",": true,
 	}
 
-	DELIMITERS = []string{
-		"(",
-		")",
-		"[",
-		"]",
-		"{",
-		"}",
-		",",
+	SPECIALS = map[string]bool{
+		"\\r\\n": true,
 	}
 )
 
