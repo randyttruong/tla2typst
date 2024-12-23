@@ -37,7 +37,7 @@ func LoadDocument(filepath string) error {
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			return errors.Wrapf(err, "File at %v does not exist. Existing", filepath)
+			return errors.Wrapf(err, "File at %v does not exist.", filepath)
 		}
 
 		return errors.Wrapf(err, "Failed to read file, got %v", err)
