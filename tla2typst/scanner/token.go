@@ -59,8 +59,7 @@ var (
 		"<<":        true,
 		">>":        true,
 		"..":        true,
-		"\\":        true,
-		"|–>":       true,
+		"|->":       true,
 		"UNCHANGED": true,
 		// + TEMPORAL LOGIC OPERATORS
 		"[]": true,
