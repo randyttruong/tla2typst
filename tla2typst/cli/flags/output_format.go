@@ -7,23 +7,23 @@ import (
 var (
 	pointSizeDefault int8 = 10
 	pointSize        int8
-	pointSizeChanged = false
+	pointSizeSet     = false
 
 	textWidthDefault int32 = 255
 	textWidth        int32
-	textWidthChanged = false
+	textWidthSet     = false
 
 	textHeightDefault int32 = 255
 	textHeight        int32
-	textHeightChanged = false
+	textHeightSet     = false
 
 	horizontalOffsetDefault int32 = 255
 	horizontalOffset        int32
-	horizontalOffsetChanged = false
+	horizontalOffsetSet     = false
 
 	verticalOffsetDefault int32 = 255
 	verticalOffset        int32
-	verticalOffsetChanged = false
+	verticalOffsetSet     = false
 )
 
 var (
@@ -49,6 +49,8 @@ func addPointSize(c *cobra.Command) {
 		pointSizeDefault,
 		"Specifies the size of the font.  Legal values are 10, 11, or 12, which cause the specification to be typeset in a 10-, 11-, or 12-point font. The default value is 10.\n",
 	)
+
+	pointSizeSet = c.PersistentFlags().Lookup(pointSizeFlagName).Changed
 }
 
 func addTextWidth(c *cobra.Command) {
@@ -58,6 +60,8 @@ func addTextWidth(c *cobra.Command) {
 		textWidthDefault,
 		"Specifies the width of the typeset output, in points.  A point is 1/72 of an inch, or about 1/3 mm.",
 	)
+
+	textWidthSet = c.PersistentFlags().Lookup(textWidthFlagName).Changed
 }
 
 func addTextHeight(c *cobra.Command) {
@@ -67,6 +71,8 @@ func addTextHeight(c *cobra.Command) {
 		textHeightDefault,
 		"Specifies the height of the typeset output, in points.  A point is 1/72 of an inch, or about 1/3 mm.",
 	)
+
+	textHeightSet = c.PersistentFlags().Lookup(textHeightFlagName).Changed
 }
 
 func addHorizontalOffset(c *cobra.Command) {
@@ -76,6 +82,8 @@ func addHorizontalOffset(c *cobra.Command) {
 		horizontalOffsetDefault,
 		"Specifies distances, in points, by which the text should be moved horizontally or vertically on the page.  Exactly where on a page the text appears depends on the printer or screen-display program.  You may have to adjust this value to get the output to appear centered on the printed page, or for the entire output to be visible when viewed on the screen.",
 	)
+
+	horizontalOffsetSet = c.PersistentFlags().Lookup(horizontalOffsetFlagName).Changed
 }
 
 func addVerticalOffset(c *cobra.Command) {
@@ -85,6 +93,8 @@ func addVerticalOffset(c *cobra.Command) {
 		verticalOffsetDefault,
 		"Specifies distances, in points, by which the text should be moved horizontally or vertically on the page.  Exactly where on a page the text appears depends on the printer or screen-display program.  You may have to adjust this value to get the output to appear centered on the printed page, or for the entire output to be visible when viewed on the screen.",
 	)
+
+	verticalOffsetSet = c.PersistentFlags().Lookup(verticalOffsetFlagName).Changed
 }
 
 func PointSize() int8 {
