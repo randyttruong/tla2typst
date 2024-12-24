@@ -32,11 +32,25 @@ func Command() *cobra.Command {
 			fmt.Printf("Beginning parsing\n")
 
 			loader := scanner.GetLoader()
-
 			err = scanner.InitScanner(loader)
 
 			if err != nil {
-				return errors.Wrapf(err, "Unable to start scanner, got %v", err)
+				return errors.Wrapf(err, "Unable to initialize scanner, got %v\n", err)
+			}
+
+			scnr := scanner.GetScanner()
+
+			err = scnr.ScanContent()
+
+			if err != nil {
+				return errors.Wrapf(err, "Unable to tokenize stream, got %v\n", err)
+			}
+
+			err = scanner.ParseContent()
+
+			if err != nil {
+				fmt.Println("something went wrong when parsing-- as expected lol")
+				// return errors.Wrapf(err, "Unable to parse content, got %v", err)
 			}
 
 			return nil
