@@ -4,7 +4,7 @@ type BinaryOperator int
 
 const (
 	UNASSIGNED_BINOP BinaryOperator = iota
-	// + PRIUnaryOperator = iotaUnaryOperator = iotaMITIVES
+	// + PRIMITIVES
 	ASSIGN
 	// + ARITHEMTIC
 	ADD
