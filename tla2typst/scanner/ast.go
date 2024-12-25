@@ -73,26 +73,59 @@ const (
 	FIELD
 )
 
-type Expr struct {
+type Expr interface {
+	accept(v Visitor)
 }
 
-type BinaryOperation struct {
+type Visitor interface {
+	visitBinaryExpr(b *Binary)
+	visitUnaryExpr(u *Unary)
+	visitGrouping(g *Grouping)
+	visitComprehension(c *Comprehension)
+}
+
+type Walker struct {
+	Visitor
+}
+
+func (w *Walker) visitBinaryExpr(b *Binary)           {}
+func (w *Walker) visitUnaryExpr(u *Unary)             {}
+func (w *Walker) visitGrouping(g *Grouping)           {}
+func (w *Walker) visitComprehension(c *Comprehension) {}
+
+type Binary struct {
 	Expr
 	op    BinaryOperator
 	left  Expr
 	right Expr
 }
 
-type UnaryOperation struct {
+func (b *Binary) accept(v Visitor) {
+	v.visitBinaryExpr(b)
+}
+
+type Unary struct {
 	Expr
 	op    UnaryOperator
 	right Expr
+}
+
+func (u *Unary) accept(v Visitor) {
+	v.visitUnaryExpr(u)
 }
 
 type Grouping struct {
 	Expr
 }
 
+func (g *Grouping) accept(v Visitor) {
+	v.visitGrouping(g)
+}
+
 type Comprehension struct {
-	Grouping
+	Expr
+}
+
+func (c *Comprehension) accept(v Visitor) {
+	v.visitComprehension(c)
 }
