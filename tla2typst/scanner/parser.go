@@ -24,6 +24,10 @@ func InitParser(scanner *ScannerState) error {
 	return nil
 }
 
+func GetParser() *ParserState {
+	return Parser
+}
+
 func (p *ParserState) ParseContent() error {
 
 	if p.scanner == nil {

@@ -46,7 +46,9 @@ func Command() *cobra.Command {
 				return errors.Wrapf(err, "Unable to tokenize stream, got %v\n", err)
 			}
 
-			err = scanner.ParseContent()
+			prsr := scanner.GetParser()
+
+			err = prsr.ParseContent()
 
 			if err != nil {
 				fmt.Println("something went wrong when parsing-- as expected lol")
