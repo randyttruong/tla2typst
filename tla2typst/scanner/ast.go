@@ -6,9 +6,35 @@ type LiteralType int
 
 const (
 	UNASSIGNED_LITERAL_TYPE LiteralType = iota
+)
+
+type Primary int
+
+const (
+	UNASSIGNED_PRIMARY Primary = iota
+	TRUE
+	FALSE
+	NIL
 	NUMERIC_LITERAL_TYPE
 	STRING_LITERAL_TYPE
 	BOOL_LITERAL_TYPE
+
+	// DELIMITERS
+	LEFT_PAREN
+	RIGHT_PAREN
+	LEFT_BRACKET
+	RIGHT_BRACKET
+	LEFT_BRACE
+	RIGHT_BRACE
+
+	// VARIABLE
+	VAR
+	IDENTIFIER_TOKEN
+
+	// CONTROL FLOW
+	IF
+	ELIF
+	ELSE
 )
 
 type BinaryOperator int
@@ -31,10 +57,11 @@ const (
 	AND
 	OR
 	IMPLIES
-	EQUIVALENT
 	SUCH_THAT
 	IMPLIED_SIMILARITY // ~> TODO: Is this really the correct symbol?
 	// + RELATIONAL
+	EQ
+	EQUIVALENT
 	GREATER
 	LESS
 	GREATER_EQ
