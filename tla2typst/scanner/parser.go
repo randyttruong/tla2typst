@@ -6,12 +6,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ParserState struct {
+type Parser struct {
 	scanner *ScannerState
+	idx     int
 }
 
 var (
-	Parser = &ParserState{}
+	Prsr = &Parser{idx: 0}
 )
 
 func InitParser(scanner *ScannerState) error {
@@ -19,16 +20,16 @@ func InitParser(scanner *ScannerState) error {
 		return errors.New("Scanner or stream does not exist")
 	}
 
-	Parser.scanner = scanner
+	Prsr.scanner = scanner
 
 	return nil
 }
 
-func GetParser() *ParserState {
-	return Parser
+func GetParser() *Parser {
+	return Prsr
 }
 
-func (p *ParserState) ParseContent() error {
+func (p *Parser) ParseContent() error {
 
 	if p.scanner == nil {
 		err := errors.New("Scanner or stream does not exist")
