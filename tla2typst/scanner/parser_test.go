@@ -30,7 +30,10 @@ func Test_PrettyPrinting(t *testing.T) {
 		{
 			testName: "Init == 1",
 			ast: &Binary{
-				op: "==",
+				op: &Token{
+					tokenType: OPERATOR,
+					value:     "==",
+				},
 				left: &Identifier{
 					value: "Init",
 				},
