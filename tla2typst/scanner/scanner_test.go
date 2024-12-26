@@ -88,6 +88,21 @@ func TestScanContentSpecialChar(t *testing.T) {
 	}
 }
 
+// TODO: Write tests with latex, backslash operators
+func TestScanContentLatexOperators(t *testing.T) {
+	tests := []struct {
+		testName       string
+		test           string
+		expectedStream []*Token
+		err            error
+	}{}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+		})
+	}
+}
+
 func TestScanContentComments(t *testing.T) {
 	tests := []struct {
 		testName       string
