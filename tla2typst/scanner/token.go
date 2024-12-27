@@ -5,6 +5,8 @@ type TokenType int
 const (
 	// KEYWORDS
 	KEYWORD TokenType = iota
+	// FILE-RELATED
+	EOF
 	// CONSTANT OPERATORS
 	// + LOGIC
 	TRUE
@@ -46,7 +48,7 @@ const (
 	// USER-DEFINED OPERATORS
 	SLASH_SLASH
 	HAT_HAT
-	ARROW_HYPH
+	// ARROW_HYPH // FIXME: What is this again?
 	AMPERSAND
 	DOUBLE_AMPERSAND
 	PIPE
@@ -119,7 +121,6 @@ const (
 	JAVA_TIME    // JavaTime
 	PERMUTATIONS // Permutations
 	SORT_SEQ     // SortSeq
-
 	// TYPESET SYMBOLS
 	AND                // 1. /\\ | \land
 	OR                 // 2. \\/ | \lor
@@ -136,7 +137,7 @@ const (
 	LESS               // 13. <
 	GREATER            // 14. >
 	DIAMOND            // 15. <>
-	LESS_EQ            // 16. \leq | =< | >=
+	LESS_EQ            // 16. \leq | =< | <=
 	GREATER_EQ         // 17. \geq | >=
 	WEAK_IMPLIES       // 18. ~>
 	LESS_LESS          // 19. \ll
@@ -172,37 +173,36 @@ const (
 	CAP                // 49. \cap | \intersect
 	CUP                // 50. \cup | \union
 	ASYMP              // 51. \asymp
-	SQ_SECT            // 52. \sqcap
-	SQ_CAP             // 53. \sqcap
-	SQ_CUP             // 54. \sqcup
-	APPROX             // 55. \approx
-	O_PLUS             // 56. (+) | \oplus
-	U_PLUS             // 57. \uplus
-	CONG               // 58. \cong
-	O_MINUS            // 59. (-) | \ominus
-	X                  // 60. \X | \times
-	DOT_EQ             // 61. \doteq
-	O_DOT              // 62. (.) | \odot
-	WR                 // 63. \wr
-	EXP                // 64. ^ (ie, x^y)
-	O_TIMES            // 65. (\X) | \otimes
-	PROPTO             // 66. \propto
-	// 67. ^ (ie, x^+, which should already be handled...)
-	O_SLASH        // 68. (/)  | \oslash
-	STRING_LITERAL // 69. "" (ie, string literals)
-	// 70. ^ (ie, x^*, which should be handled)
-	EXISTS      // 71. \E
-	FORALL      // 72. \A
-	HASH        // 73. # for ^ (ie, x^#)
-	BOLD_EXISTS // 74. \EE
-	BOLD_FORALL // 75. \AA
-	PRIME       // 76. '
-	BRACKET_V   // 77. ]_v
-	TUP_V       // 78. >>_v
-	WF_V        // 79. WF_v
-	SF          // 80. SF_v
-	BAR         // 81. ------ (where length 4+)
-	BOT_BAR     // 82. ====== (where length is 4+)
+	SQ_CAP             // 52. \sqcap
+	SQ_CUP             // 53. \sqcup
+	APPROX             // 54. \approx
+	O_PLUS             // 55. (+) | \oplus
+	U_PLUS             // 56. \uplus
+	CONG               // 57. \cong
+	O_MINUS            // 58. (-) | \ominus
+	X                  // 59. \X | \times
+	DOT_EQ             // 60. \doteq
+	O_DOT              // 61. (.) | \odot
+	WR                 // 62. \wr
+	EXP                // 63. ^ (ie, x^y)
+	O_TIMES            // 64. (\X) | \otimes
+	PROPTO             // 65. \propto
+	// 66. ^ (ie, x^+, which should already be handled...)
+	O_SLASH        // 67. (/)  | \oslash
+	STRING_LITERAL // 68. "" (ie, string literals)
+	// 69. ^ (ie, x^*, which should be handled)
+	EXISTS      // 70. \E
+	FORALL      // 71. \A
+	HASH        // 72. # for ^ (ie, x^#)
+	BOLD_EXISTS // 73. \EE
+	BOLD_FORALL // 74. \AA
+	PRIME       // 75. '
+	BRACKET_V   // 76. ]_v
+	TUP_V       // 77. >>_v
+	WF_V        // 78. WF_v
+	SF          // 79. SF_v
+	BAR         // 80. ------ (where length 4+)
+	BOT_BAR     // 81. ====== (where length is 4+)
 
 	IDENTIFIER
 	NUM_LITERAL
@@ -214,6 +214,9 @@ const (
 	UNASSIGNED
 )
 
+// NOTE: This is probably an unsustainable way of
+// adding keywords, operators, etc., so in the future,
+// it makes sense to add a loader to autogenerate the maps.
 var (
 	KEYWORDS map[string]bool = map[string]bool{
 		"MODULE":    true,
@@ -223,55 +226,202 @@ var (
 	}
 
 	OPERATORS map[string]bool = map[string]bool{
-		// + LOGICAL OPERATORS
-		"/\\": true,
-		"\\/": true,
-		"~":   true,
-		"=>":  true,
-		"<=>": true,
-		// + QUANTIFIERS
-		"\\E": true,
-		"\\A": true,
-		// + SET OPERATORS
-		"\\in":       true,
-		"\\notin":    true,
-		"\\subseteq": true,
-		"\\supseteq": true,
-		"\\subset":   true,
-		"\\supset":   true,
-		"\\union":    true,
-		"\\cap":      true,
-		"\\setminus": true,
-		// + ARITHMETIC OPERATORS
-		"+":     true,
-		"-":     true,
-		"*":     true,
-		"\\div": true,
-		"^":     true,
-		// + RELATIONAL OPERATORS
-		"=":  true,
-		"#":  true,
-		">":  true,
-		"<":  true,
-		"<=": true,
-		">=": true,
-		// + MISC OPERATORS
-		"==":        true,
-		"<<":        true,
-		">>":        true,
-		"..":        true,
-		"|->":       true,
+		// CONSTANT OPERATORS
+		// + LOGIC
+		"TRUE":    true,
+		"FALSE":   true,
+		"BOOLEAN": true,
+		"CHOOSE":  true,
+		":":       true,
+		"!":       true,
+		// + SUBSETS
+		"SUBSET": true,
+		"UNION":  true,
+		// + FUNCTIONS
+		"DOMAIN": true,
+		"EXCEPT": true,
+		// MISCELLANEOUS CONSTRUCTS
+		// + CONTROL FLOW
+		"IF":    true,
+		"THEN":  true,
+		"ELSE":  true,
+		"CASE":  true,
+		"OTHER": true,
+		"LET":   true,
+		"IN":    true,
+		// + ACTION OPERATORS
+		"ENABLED":   true,
 		"UNCHANGED": true,
-		// + TEMPORAL LOGIC OPERATORS
-		"[]": true,
-		"<>": true,
-		"~>": true,
-		// + FUNCTIONAL OPERATORS
-		"Seq":    true,
-		"Head":   true,
-		"Tail":   true,
-		"Append": true,
-		"Len":    true,
+		// USER-DEFINED OPERATORS
+		"//":  true,
+		"^^":  true,
+		"&":   true,
+		"&&":  true,
+		"|":   true,
+		"%%":  true,
+		"$":   true,
+		"$$":  true,
+		"##":  true,
+		"?":   true,
+		"??":  true,
+		"!!":  true,
+		"::=": true,
+		// STANDARD OPERATORS
+		"+":   true,
+		"-":   true,
+		"*":   true,
+		"/":   true,
+		"=":   true,
+		"..":  true,
+		"...": true,
+		"%":   true,
+		// STANDARD MODULE NAMES
+		"Naturals":      true,
+		"Integers":      true,
+		"Reals":         true,
+		"Sequences":     true,
+		"FiniteSets":    true,
+		"Bags":          true,
+		"RealTime":      true,
+		"TLC":           true,
+		"Json":          true,
+		"Randomization": true,
+		// + Naturals, Integers, Reals
+		"Nat":  true,
+		"Real": true,
+		"Int":  true,
+		"Inf":  true,
+		// + Sequences
+		"Head":      true,
+		"SelectSeq": true,
+		"SubSeq":    true,
+		"Append":    true,
+		"Len":       true,
+		"Seq":       true,
+		"Tail":      true,
+		// + FiniteSets
+		"IsFiniteSet": true,
+		"Cardinality": true,
+		// + Bags
+		"BagIn":          true,
+		"CopiesIn":       true,
+		"SubBag":         true,
+		"BagOfAll":       true,
+		"EmptyBag":       true,
+		"BagToSet":       true,
+		"IsABag":         true,
+		"BagCardinality": true,
+		"BagUnion":       true,
+		"SetToBag":       true,
+		// + RealTime
+		"RTBound": true,
+		"RTNow":   true,
+		"now":     true,
+		// + TLC
+		"<:":           true,
+		":>":           true,
+		"@@":           true, // NOTE: @@ also referenced in User-Defined Operator Symbols (and is omitted)
+		"Print":        true,
+		"Assert":       true,
+		"JavaTime":     true,
+		"Permutations": true,
+		"SortSeq":      true,
+		// TYPESET SYMBOLS
+		"/\\":          true,
+		"\\land":       true,
+		"\\/":          true,
+		"\\lor":        true,
+		"=>":           true,
+		"~":            true,
+		"\\lnot":       true,
+		"\\neg":        true,
+		"<=>":          true,
+		"\\equiv":      true,
+		"==":           true,
+		"\\in":         true,
+		"\\notin":      true,
+		"#":            true,
+		"/=":           true,
+		"<<":           true,
+		">>":           true,
+		"[]":           true,
+		"<":            true,
+		">":            true,
+		"<>":           true,
+		"\\leq":        true,
+		"=<":           true,
+		"<=":           true,
+		"\\geq":        true,
+		">=":           true,
+		"~>":           true,
+		"\\ll":         true,
+		"\\gg":         true,
+		"-+->":         true,
+		"\\prec":       true,
+		"\\succ":       true,
+		"|->":          true,
+		"\\preceq":     true,
+		"\\succeq":     true,
+		"\\div":        true,
+		"\\subseteq":   true,
+		"\\supseteq":   true,
+		"\\cdot":       true,
+		"\\subset":     true,
+		"\\supset":     true,
+		"\\o":          true,
+		"\\circ":       true,
+		"\\sqsubset":   true,
+		"\\sqsupset":   true,
+		"\\bullet":     true,
+		"\\sqsubseteq": true,
+		"\\sqsupseteq": true,
+		"\\star":       true,
+		"|-":           true,
+		"-|":           true,
+		"\\bigcircle":  true,
+		"|=":           true,
+		"=|":           true,
+		"\\sim":        true,
+		"->":           true,
+		"<-":           true,
+		"\\simeq":      true,
+		"\\cap":        true,
+		"\\intersect":  true,
+		"\\cup":        true,
+		"\\union":      true,
+		"\\asymp":      true,
+		"\\sqcap":      true,
+		"\\sqcup":      true,
+		"\\approx":     true,
+		"(+)":          true,
+		"\\oplus":      true,
+		"\\uplus":      true,
+		"\\cong":       true,
+		"\\(-)":        true,
+		"\\ominus":     true,
+		"\\X":          true,
+		"\\times":      true,
+		"\\doteq":      true,
+		"\\(.)":        true,
+		"\\odot":       true,
+		"\\wr":         true,
+		"^":            true,
+		"(\\X)":        true,
+		"\\otimes":     true,
+		"\\propto":     true,
+		"\\(/)":        true,
+		"\\oslash":     true,
+		"\\E":          true,
+		"\\A":          true,
+		"\\EE":         true,
+		"\\AA":         true,
+		"'":            true,
+		"_v":           true,
+		"WF":           true,
+		"SF":           true,
+		"----":         true,
+		"====":         true,
+		"\\setminus":   true,
 	}
 
 	DELIMITERS = map[string]bool{
