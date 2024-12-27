@@ -1,6 +1,8 @@
 package scanner
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type LiteralType int
 
@@ -8,108 +10,9 @@ const (
 	UNASSIGNED_LITERAL_TYPE LiteralType = iota
 )
 
-type Primary int
+// type Primary int
 
-const (
-	UNASSIGNED_PRIMARY Primary = iota
-	TRUE
-	FALSE
-	NIL
-	NUMERIC_LITERAL_TYPE
-	STRING_LITERAL_TYPE
-	BOOL_LITERAL_TYPE
-
-	// DELIMITERS
-	LEFT_PAREN
-	RIGHT_PAREN
-	LEFT_BRACKET
-	RIGHT_BRACKET
-	LEFT_BRACE
-	RIGHT_BRACE
-
-	// VARIABLE
-	VAR
-	IDENTIFIER_TOKEN
-
-	// CONTROL FLOW
-	IF
-	ELIF
-	ELSE
-)
-
-type BinaryOperator int
-
-const (
-	UNASSIGNED_BINOP BinaryOperator = iota
-	// + PRIMITIVES
-	ASSIGN
-	// + ARITHEMTIC
-	ADD
-	SUB
-	MULTIPLY     // represented as cdot or asterisk
-	FLOOR_DIVIDE // int divide
-	DIVIDE       // float divide
-	MOD
-	EXP
-	// + GROUPING
-	RANGE
-	// + LOGICAL
-	AND
-	OR
-	IMPLIES
-	SUCH_THAT
-	IMPLIED_SIMILARITY // ~> TODO: Is this really the correct symbol?
-	// + RELATIONAL
-	EQ
-	EQUIVALENT
-	GREATER
-	LESS
-	GREATER_EQ
-	LESS_EQ
-	NOT_EQ
-	LESS_LESS
-	GREATER_GREATER
-	// + TEMPORAL
-	LEADS_TO
-	// + INTER SET
-	SUBJUNCTION
-	DISJUNCTION
-	IN
-	NOT_IN
-	SET_MINUS
-	// + INTRA SET
-	SUBSET
-	SUBSET_EQ
-	SUPSET
-	SUPSET_EQ
-	SQ_SUBSET
-	SQ_SUBSET_EQ
-	SQ_SUPSET
-	SQ_SUPSET_EQ
-)
-
-type UnaryOperator int
-
-const (
-	UNASSIGNED_UNOP UnaryOperator = iota
-	// + TYPECASTING
-	NAT
-	REAL
-	INT
-	INFINITY
-	// + LOGICAL
-	NEGATE
-	// + QUANTIFIERs
-	FORALL
-	EXISTS
-	// + TEMPORAL
-	ALWAYS
-	EVENTUALLY
-	WEAK_FAIRNESS
-	STRONG_FAIRNESS
-	// + RECORDS
-	FIELD
-)
+// type BinaryOperator int
 
 type Decl interface {
 }
@@ -184,7 +87,7 @@ func (p *Parser) suchThat() (Expr, error) {
 
 // TODO: make it so that the match functions return errors,
 func (p *Parser) declaration() (Expr, error) {
-	exists, err := p.matchP(VAR)
+	exists, err := p.match(VAR)
 
 	if err != nil {
 		// TODO: figure out how to throw errors
@@ -200,7 +103,8 @@ func (p *Parser) declaration() (Expr, error) {
 }
 
 // TODO: write this
-func (p *Parser) synchronize() {
+func (p *Parser) synchronize() error {
+	return nil
 }
 
 func (p *Parser) varDecl() Expr {
@@ -208,7 +112,7 @@ func (p *Parser) varDecl() Expr {
 
 	var initializer Expr = nil
 
-	if exists, _ := p.matchBinOp(EQ); exists {
+	if exists, _ := p.match(EQUAL); exists {
 		initializer = p.expression()
 	}
 
@@ -232,10 +136,10 @@ type Expr interface {
 	accept(v Visitor) any
 }
 
-func (p *Parser) matchBinOp(bin ...BinaryOperator) (bool, error) {
+func (p *Parser) match(toks ...TokenType) (bool, error) {
 
-	for idx := range bin {
-		if p.checkBinOp(bin[idx]) {
+	for idx := range toks {
+		if p.check(toks[idx]) {
 			p.advance()
 
 			return true, nil
@@ -245,58 +149,13 @@ func (p *Parser) matchBinOp(bin ...BinaryOperator) (bool, error) {
 	return false, nil
 }
 
-func (p *Parser) matchUnOp(un ...UnaryOperator) (bool, error) { //
-	for idx := range un {
-		if p.checkUnOp(UnaryOperator(un[idx])) {
-			p.advance()
+func (p *Parser) check(tokenType TokenType) bool {
 
-			return true, nil
-		}
-	}
-
-	return false, nil
-
-}
-
-func (p *Parser) matchP(P ...Primary) (bool, error) {
-	for idx := range P {
-		if p.checkP(P[idx]) {
-			p.advance()
-
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-// TODO: bruh wtf is this
-// why should i have to check the tokentype man, since
-// i have a fuckton of different operators.
-func (p *Parser) checkBinOp(tokType BinaryOperator) bool {
 	if p.reachedEnd() {
 		return false
 	}
 
-	return true
-	// return (p.scanner.stream[p.idx].tokenType == tokType)
-}
-
-func (p *Parser) checkUnOp(tokType UnaryOperator) bool {
-	if p.reachedEnd() {
-		return false
-	}
-
-	return true
-	// return (p.scanner.stream[p.idx].tokenType == tokType)
-}
-
-func (p *Parser) checkP(tokType Primary) bool {
-	if p.reachedEnd() {
-		return false
-	}
-
-	return true
+	return p.scanner.stream[p.idx].tokenType == tokenType
 }
 
 func (p *Parser) reachedEnd() bool {
@@ -311,9 +170,9 @@ func (p *Parser) advance() *Token {
 	return p.previous()
 }
 
-func (p *Parser) consume(pType Primary, msg string) (*Token, error) {
+func (p *Parser) consume(pType TokenType, msg string) (*Token, error) {
 
-	if p.checkP(pType) {
+	if p.check(pType) {
 		return p.advance(), nil
 	}
 
@@ -332,7 +191,7 @@ func (p *Parser) expression() Expr {
 func (p *Parser) equality() Expr {
 	expr := p.comparison()
 
-	for exists, _ := p.matchBinOp(EQ, EQUIVALENT, NOT_EQ); exists; {
+	for exists, _ := p.match(EQUAL, EQUIVALENT, NOT_EQ); exists; {
 		op := p.previous()
 		right := p.comparison() // should be a excpr
 
@@ -349,7 +208,7 @@ func (p *Parser) equality() Expr {
 func (p *Parser) comparison() Expr {
 	expr := p.term()
 
-	for exists, _ := p.matchBinOp(GREATER, LESS, GREATER_EQ, LESS_EQ, LESS_LESS, GREATER_GREATER); exists; {
+	for exists, _ := p.match(GREATER, LESS, GREATER_EQ, LESS_EQ, LESS_LESS, GREATER_GREATER); exists; {
 		op := p.previous()
 		right := p.term()
 
@@ -366,7 +225,7 @@ func (p *Parser) comparison() Expr {
 func (p *Parser) term() Expr {
 	expr := p.factor()
 
-	for exists, _ := p.matchBinOp(); exists; {
+	for exists, _ := p.match(); exists; {
 		op := p.previous()
 		right := p.factor()
 
@@ -383,7 +242,7 @@ func (p *Parser) term() Expr {
 func (p *Parser) factor() Expr {
 	expr := p.unary()
 
-	for exists, _ := p.matchBinOp(); exists; {
+	for exists, _ := p.match(); exists; {
 		op := p.previous()
 		right := p.unary()
 
@@ -398,7 +257,7 @@ func (p *Parser) factor() Expr {
 }
 
 func (p *Parser) unary() Expr {
-	if exists, _ := p.matchUnOp(); exists {
+	if exists, _ := p.match(); exists {
 		op := p.previous()
 		right := p.primary()
 
@@ -413,13 +272,13 @@ func (p *Parser) unary() Expr {
 
 func (p *Parser) primary() Expr {
 
-	if exists, _ := p.matchP(TRUE); exists {
+	if exists, _ := p.match(TRUE); exists {
 		return &Literal{
 			value: "true", // TODO: Change this
 		}
 	}
 
-	if exists, _ := p.matchP(FALSE); exists {
+	if exists, _ := p.match(FALSE); exists {
 		return &Literal{
 			value: "false", // TODO: Change this
 		}
@@ -432,19 +291,19 @@ func (p *Parser) primary() Expr {
 	//  }
 	// }
 
-	if exists, _ := p.matchP(NUMERIC_LITERAL_TYPE, STRING_LITERAL_TYPE); exists {
+	if exists, _ := p.match(NUM_LITERAL, STRING_LITERAL); exists {
 		return &Literal{
 			value: p.previous().value,
 		}
 	}
 
-	if exists, _ := p.matchP(IDENTIFIER_TOKEN); exists {
+	if exists, _ := p.match(IDENTIFIER_TOKEN); exists {
 		return &Var{
 			name: p.previous(),
 		}
 	}
 
-	if exists, _ := p.matchP(LEFT_PAREN); exists {
+	if exists, _ := p.match(LEFT_PAREN); exists {
 		expr := p.expression()
 
 		_, err := p.consume(RIGHT_PAREN, "Expected a right parenthesis here")
@@ -458,7 +317,7 @@ func (p *Parser) primary() Expr {
 		}
 	}
 
-	if exists, _ := p.matchP(LEFT_BRACKET); exists {
+	if exists, _ := p.match(LEFT_BRACKET); exists {
 		expr := p.expression()
 
 		return &Grouping{
@@ -466,7 +325,7 @@ func (p *Parser) primary() Expr {
 		}
 	}
 
-	if exists, _ := p.matchP(LEFT_BRACE); exists {
+	if exists, _ := p.match(LEFT_BRACE); exists {
 		expr := p.expression()
 
 		return &Grouping{
