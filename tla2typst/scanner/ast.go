@@ -309,7 +309,7 @@ func (p *Parser) primary() Expr {
 		_, err := p.consume(RIGHT_PAREN, "Expected a right parenthesis here")
 
 		if err != nil {
-			fmt.Println("Something went wrong, got %v", err) // TODO: figure out error handling lol
+			fmt.Printf("Something went wrong, got %v", err) // TODO: figure out error handling lol
 		}
 
 		return &Grouping{
