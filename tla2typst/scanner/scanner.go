@@ -11,14 +11,17 @@ import (
 
 // ScannerState represents the scanner's current state.
 type ScannerState struct {
-	loader *Loader
-	stream []*Token
-	val    string
-	pos    int
+	loader    *Loader
+	stream    []*Token
+	val       string
+	line      int
+	col       int
+	tokenType TokenType
+	pos       int // FIXME: DEPRECATE THIS IN FAVOR OF ScannerState.line and ScvannerState.col
 }
 
 var (
-	Scanner = &ScannerState{pos: 0}
+	Scanner = &ScannerState{pos: 0, tokenType: UNASSIGNED}
 )
 
 // InitScanner passes the loader into ScannerState
@@ -120,11 +123,12 @@ func isNumLiteral(s string) bool {
 	return true
 }
 
-func (s *ScannerState) pushToken(tok *Token) *Token {
-	tok.pos = s.pos
-	tok.value = strings.TrimSpace(s.val)
+func (s *ScannerState) pushToken() *Token {
+	s.val = strings.TrimSpace(s.val)
+	new_tok := &Token{tokenType: s.tokenType, value: s.val}
 
-	s.stream = append(s.stream, tok)
+	s.tokenType = UNASSIGNED
+	s.stream = append(s.stream, new_tok)
 	s.val = ""
 	s.pos++
 	return &Token{tokenType: UNASSIGNED}
@@ -140,8 +144,6 @@ func (s *ScannerState) ScanContent() error {
 		return errors.Wrapf(err, "Something went wrong with scanning, got %v", err)
 	}
 
-	tok := &Token{tokenType: UNASSIGNED}
-
 	for pos, curr := range *buf {
 
 		currStr := string(curr)
@@ -153,70 +155,78 @@ func (s *ScannerState) ScanContent() error {
 		// fmt.Printf("[DEBUG] This is the current token: %v\n", s.val)
 		// fmt.Printf("[DEBUG] This is the pos: %v\n", pos)
 
-		// TODO: Add comment support
-		if tok.tokenType == UNASSIGNED {
-			// TODO: Check out how newlines and whitespace are addressed
-			// Should I keep track of the position?
+		// HACK: This is literally just for all of the generic ones,
+		// definitely make this a lot more finegrained in the future
+		// FIXME: Add support for all of the new tokens
+		if s.tokenType == UNASSIGNED {
 			if _, exists := DELIMITERS[s.val]; exists {
-				tok.tokenType = DELIMITER
-				tok = s.pushToken(tok)
+				s.tokenType = DELIMITER
+				s.pushToken()
 			} else if _, exists := SPECIALS[s.val]; exists {
-				tok.tokenType = SPECIAL
+				s.tokenType = SPECIAL
 			} else if _, exists := OPERATORS[s.val]; exists {
-				tok.tokenType = OPERATOR
+				s.tokenType = OPERATOR
 				if curr == '=' {
 					continue
 				}
-				tok = s.pushToken(tok)
+				s.pushToken()
 			} else if _, exists := KEYWORDS[s.val]; exists {
-				tok.tokenType = KEYWORD
+				s.tokenType = KEYWORD
 			} else if curr == '"' {
 				// NOTE: Because there aren't any while-loops in Go,
 				// it is necessary to abstract the token logic
-				tok.tokenType = STRING_LITERAL
+				s.tokenType = STRING_LITERAL
 			} else if unicode.IsNumber(curr) {
-				tok.tokenType = NUM_LITERAL
+				s.tokenType = NUM_LITERAL
 			} else if unicode.IsLetter(curr) {
-				tok.tokenType = IDENTIFIER
+				s.tokenType = IDENTIFIER
 			} else if unicode.IsSpace(curr) {
 				s.val = ""
 			}
-		} else if tok.tokenType == KEYWORD {
+		} else if s.tokenType == KEYWORD {
 			if unicode.IsSpace(curr) {
 				s.val = s.val[0 : len(s.val)-1]
-				tok = s.pushToken(tok)
+				s.pushToken()
 			} else if unicode.IsLetter(curr) || unicode.IsNumber(curr) {
-				tok.tokenType = IDENTIFIER
+				s.tokenType = IDENTIFIER
 			} else {
 				err = fmt.Errorf("[FATAL ERROR]: Attempted adding a nonalpha character to a keyword/identifier")
 				return err
 			}
-		} else if tok.tokenType == IDENTIFIER {
+		} else if s.tokenType == IDENTIFIER {
 			// cases:
 			// + cannot have delimiters or punctuation
+			//  FIXME: What if an identifier turns out to be a keyword?
 			if curr == ' ' || curr == '\n' {
 				s.val = s.val[0 : len(s.val)-1]
-				tok = s.pushToken(tok)
+
+				if KEYWORDS[s.val] {
+					s.tokenType = KEYWORD
+				} else if OPERATORS[s.val] {
+					s.tokenType = OPERATOR
+				}
+
+				s.pushToken()
 			} else if curr == '(' || curr == ')' || curr == '{' || curr == '}' {
 				s.val = s.val[0 : len(s.val)-1]
-				tok = s.pushToken(tok)
+				s.pushToken()
 
-				tok.tokenType = DELIMITER
+				s.tokenType = DELIMITER
 				s.val += currStr
-				tok = s.pushToken(tok)
+				s.pushToken()
 			}
-		} else if tok.tokenType == OPERATOR {
+		} else if s.tokenType == OPERATOR {
 			if curr == ' ' {
-				tok = s.pushToken(tok)
+				s.pushToken()
 			}
-		} else if tok.tokenType == STRING_LITERAL {
+		} else if s.tokenType == STRING_LITERAL {
 			if curr == '"' || curr == '\n' {
-				tok = s.pushToken(tok)
+				s.pushToken()
 			} else if pos == *bufLen-1 {
 				err = fmt.Errorf("[FATAL ERROR]: Unclosed literal")
 				return err
 			}
-		} else if tok.tokenType == NUM_LITERAL {
+		} else if s.tokenType == NUM_LITERAL {
 			// error handling here
 			if !unicode.IsNumber(curr) {
 				err = fmt.Errorf("[FATAL ERROR]: Numeric literal found at (LOL I NEED TO KEEP TRACK OF POS) inserts non-numeric char: %v", s.val)
@@ -225,55 +235,62 @@ func (s *ScannerState) ScanContent() error {
 
 			if curr == ' ' {
 				s.val = s.val[0 : len(s.val)-1]
-				tok = s.pushToken(tok)
+				s.pushToken()
 			}
-		} else if tok.tokenType == SPECIAL {
+		} else if s.tokenType == SPECIAL {
 			switch s.val[0] {
 			case '(':
 				if curr == '*' {
-					tok.tokenType = BLOCK_COMMENT
+					s.tokenType = BLOCK_COMMENT
 				} else {
 					body := s.val[1:]
 					s.val = string(s.val[0])
 
-					tok.tokenType = DELIMITER
-					s.pushToken(tok)
+					s.tokenType = DELIMITER
+					s.pushToken()
 
 					s.val = body
 
 					if unicode.IsLetter(curr) {
-						tok.tokenType = IDENTIFIER
+						s.tokenType = IDENTIFIER
 					} else if curr == '"' {
-						tok.tokenType = STRING_LITERAL
+						s.tokenType = STRING_LITERAL
 					} else if unicode.IsNumber(curr) {
-						tok.tokenType = NUM_LITERAL
+						s.tokenType = NUM_LITERAL
 					} else if _, exists := DELIMITERS[string(curr)]; exists {
-						tok.tokenType = DELIMITER
-						s.pushToken(tok)
+						s.tokenType = DELIMITER
+						s.pushToken()
 					}
 				}
 			case '\\':
 				if curr == '*' {
-					tok.tokenType = INLINE_COMMENT
+					s.tokenType = INLINE_COMMENT
 				} else if curr == '/' {
-					tok.tokenType = OPERATOR
+					s.tokenType = OPERATOR
 				} else if unicode.IsLetter(curr) {
-					tok.tokenType = UNASSIGNED
+					s.tokenType = UNASSIGNED
 				} else if unicode.IsNumber(curr) {
 					err := fmt.Errorf("[FATAL ERROR]: Unknown token %v, breaking", s.val)
 					return err
 				}
+			case '/': // HACK: This is probably not a very robust way of handling '/'-prefixed stuff-- but it works for now
+				if curr == ' ' || curr == '\\' || curr == '=' {
+					s.tokenType = OPERATOR
+				}
 			}
-		} else if tok.tokenType == INLINE_COMMENT {
+		} else if s.tokenType == INLINE_COMMENT {
 			if curr == '\n' || pos == *bufLen-1 {
-				s.pushToken(tok)
+				s.pushToken()
 			}
-		} else if tok.tokenType == BLOCK_COMMENT {
+		} else if s.tokenType == BLOCK_COMMENT {
 			if s.val[len(s.val)-2:len(s.val)] == "*)" {
-				s.pushToken(tok)
+				s.pushToken()
 			}
 		}
 	}
+
+	s.tokenType = EOF
+	s.pushToken()
 
 	return nil
 }
