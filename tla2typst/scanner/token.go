@@ -267,10 +267,10 @@ var (
 		"!!":  true,
 		"::=": true,
 		// STANDARD OPERATORS
-		"+":   true,
-		"-":   true,
-		"*":   true,
-		"/":   true,
+		"+": true,
+		"-": true,
+		"*": true,
+		// "/":   true, // NOTE: This is located in specials to avoid misparse with /\\
 		"=":   true,
 		"..":  true,
 		"...": true,
@@ -441,6 +441,7 @@ var (
 		"(": true,
 		// + Forward slashes are start chars for both logical AND and inline comments
 		"\\": true,
+		"/":  true,
 	}
 )
 
