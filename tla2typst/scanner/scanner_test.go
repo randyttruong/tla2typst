@@ -118,6 +118,10 @@ func TestScanContentComments(t *testing.T) {
 					tokenType: BLOCK_COMMENT,
 					value:     "(* HELLO *)",
 				},
+				&Token{
+					tokenType: EOF,
+					value:     "",
+				},
 			},
 		},
 		{
@@ -128,6 +132,10 @@ func TestScanContentComments(t *testing.T) {
 					tokenType: BLOCK_COMMENT,
 					value:     "(****************)",
 				},
+				&Token{
+					tokenType: EOF,
+					value:     "",
+				},
 			},
 		},
 		{
@@ -136,7 +144,7 @@ func TestScanContentComments(t *testing.T) {
 			expectedStream: []*Token{
 				&Token{
 					tokenType: IDENTIFIER,
-					value:     "INIT",
+					value:     "Init",
 				},
 				&Token{
 					tokenType: OPERATOR,
@@ -161,6 +169,10 @@ func TestScanContentComments(t *testing.T) {
 				&Token{
 					tokenType: BLOCK_COMMENT,
 					value:     "(* This is a comment *)",
+				},
+				&Token{
+					tokenType: EOF,
+					value:     "",
 				},
 			},
 		},
@@ -196,6 +208,10 @@ func TestScanContentComments(t *testing.T) {
 					tokenType: BLOCK_COMMENT,
 					value:     "\\* This is a comment",
 				},
+				&Token{
+					tokenType: EOF,
+					value:     "",
+				},
 			},
 		},
 		{
@@ -205,6 +221,10 @@ func TestScanContentComments(t *testing.T) {
 				&Token{
 					tokenType: BLOCK_COMMENT,
 					value:     "(*\n\tThis is a test multiline comment.\n*)",
+				},
+				&Token{
+					tokenType: EOF,
+					value:     "",
 				},
 			},
 		},
