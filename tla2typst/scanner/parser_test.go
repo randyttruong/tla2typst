@@ -20,6 +20,64 @@ func Test_parser_init(t *testing.T) {
 	}
 }
 
+// TODO: Should this
+func Test_ASTGeneration(t *testing.T) {
+	tests := []struct {
+		testName   string
+		testString string
+		stream     []*Token
+		expected   Expr
+		err        error
+	}{
+		{
+			testName:   "Simple variable declaration",
+			testString: "Init == \\/ A /\\ B",
+			stream: []*Token{
+				{
+					tokenType: IDENTIFIER,
+					value:     "Init",
+				},
+				{
+					tokenType: OPERATOR,
+					value:     "==",
+				},
+				{
+					tokenType: OPERATOR,
+					value:     "\\/",
+				},
+				{
+					tokenType: IDENTIFIER,
+					value:     "A",
+				},
+				{
+					tokenType: OPERATOR,
+					value:     "/\\",
+				},
+				{
+					tokenType: IDENTIFIER,
+					value:     "B",
+				},
+				{
+					tokenType: EOF,
+					value:     "",
+				},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			s := GetScanner()
+			p := GetParser()
+
+			s.SetStream(tc.stream)
+			InitParser(s)
+
+			p.parse()
+		})
+	}
+}
+
 func Test_PrettyPrinting(t *testing.T) {
 	tests := []struct {
 		testName string
